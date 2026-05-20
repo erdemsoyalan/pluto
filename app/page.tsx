@@ -178,7 +178,7 @@ export default function App() {
           service: "Door sale",
           price: cleanSaleAmount,
           deposit: 0,
-          commissionRate: 30,
+          commissionRate: 25,
           createdAt: entry.createdAt,
         },
         ...prev,
