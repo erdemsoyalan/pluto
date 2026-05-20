@@ -421,7 +421,7 @@ export default function App() {
                         value={sale.commissionRate || ""}
                         onChange={(e) => updateSale(sale.id, "commissionRate", e.target.value)}
                         inputMode="decimal"
-                        placeholder="30"
+                        placeholder="25"
                       />
                     </label>
                   </div>
