@@ -255,7 +255,7 @@ export default function App() {
 
             <label>
               Street name
-              <input value={street} onChange={(e) => setStreet(e.target.value)} placeholder="Tillingham Gardens" />
+              <input value={street} onChange={(e) => setStreet(e.target.value)} placeholder="Street Name" />
             </label>
 
             <div className="two-col">
@@ -264,7 +264,7 @@ export default function App() {
                 <input
                   value={house}
                   onChange={(e) => setHouse(e.target.value)}
-                  placeholder="1482"
+                  placeholder="House #"
                   inputMode="numeric"
                   autoComplete="off"
                 />
@@ -275,7 +275,7 @@ export default function App() {
                 <input
                   value={saleAmount}
                   onChange={(e) => setSaleAmount(e.target.value)}
-                  placeholder="450"
+                  placeholder="Sale Price"
                   inputMode="decimal"
                 />
               </label>
@@ -284,12 +284,12 @@ export default function App() {
             <div className="two-col">
               <label>
                 Phone optional
-                <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="905..." inputMode="tel" />
+                <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Client Name" inputMode="tel" />
               </label>
 
               <label>
                 Callback time optional
-                <input value={callbackTime} onChange={(e) => setCallbackTime(e.target.value)} placeholder="Tomorrow 6 PM" />
+                <input value={callbackTime} onChange={(e) => setCallbackTime(e.target.value)} placeholder="Callback time" />
               </label>
             </div>
 
@@ -300,7 +300,7 @@ export default function App() {
 
             <label>
               Notes optional
-              <textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="Name, objection, price, callback details..." />
+              <textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="Job Deatils" />
             </label>
 
             <button className="ghost-btn" type="button" onClick={clearCurrentHouse}>
