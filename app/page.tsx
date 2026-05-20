@@ -16,7 +16,6 @@ import {
   PhoneCall,
   RotateCcw,
   Trash2,
-  Users,
   X,
 } from "lucide-react";
 
@@ -31,6 +30,7 @@ type Knock = {
   note: string;
   phone?: string;
   callbackTime?: string;
+  saleAmount?: number;
   createdAt: string;
 };
 
@@ -45,7 +45,7 @@ type Sale = {
   createdAt: string;
 };
 
-const STORAGE_KEY = "pluto-sales-command-v9";
+const STORAGE_KEY = "pluto-sales-command-v10";
 
 const actionConfig: Record<Status, { hint: string; className: string; icon: React.ReactNode }> = {
   Sold: { hint: "Close a sale", className: "sold", icon: <Check size={32} /> },
@@ -64,6 +64,7 @@ export default function App() {
   const [note, setNote] = useState("");
   const [phone, setPhone] = useState("");
   const [callbackTime, setCallbackTime] = useState("");
+  const [saleAmount, setSaleAmount] = useState("");
   const [dailyGoal, setDailyGoal] = useState(60);
   const [knocks, setKnocks] = useState<Knock[]>([]);
   const [sales, setSales] = useState<Sale[]>([]);
@@ -79,6 +80,7 @@ export default function App() {
         setNote(data.note || "");
         setPhone(data.phone || "");
         setCallbackTime(data.callbackTime || "");
+        setSaleAmount(data.saleAmount || "");
         setDailyGoal(Number(data.dailyGoal) || 60);
         setKnocks(Array.isArray(data.knocks) ? data.knocks : []);
         setSales(Array.isArray(data.sales) ? data.sales : []);
@@ -92,12 +94,27 @@ export default function App() {
     if (!loaded) return;
     localStorage.setItem(
       STORAGE_KEY,
-      JSON.stringify({ street, house, note, phone, callbackTime, dailyGoal, knocks, sales })
+      JSON.stringify({
+        street,
+        house,
+        note,
+        phone,
+        callbackTime,
+        saleAmount,
+        dailyGoal,
+        knocks,
+        sales,
+      })
     );
-  }, [loaded, street, house, note, phone, callbackTime, dailyGoal, knocks, sales]);
+  }, [loaded, street, house, note, phone, callbackTime, saleAmount, dailyGoal, knocks, sales]);
 
   const todayDate = new Date().toISOString().slice(0, 10);
-  const today = useMemo(() => knocks.filter((k) => k.createdAt.slice(0, 10) === todayDate), [knocks, todayDate]);
+
+  const today = useMemo(
+    () => knocks.filter((k) => k.createdAt.slice(0, 10) === todayDate),
+    [knocks, todayDate]
+  );
+
   const todaySales = today.filter((k) => k.status === "Sold").length;
   const callbacks = useMemo(() => knocks.filter((k) => k.status === "Callback"), [knocks]);
   const interested = knocks.filter((k) => k.status === "Interested").length;
@@ -106,17 +123,35 @@ export default function App() {
   const todayCloseRate = today.length ? Math.round((todaySales / today.length) * 1000) / 10 : 0;
   const goalPercent = Math.min(100, Math.round((today.length / Math.max(1, dailyGoal)) * 100));
   const revenue = sales.reduce((sum, sale) => sum + (Number(sale.price) || 0), 0);
-  const commission = sales.reduce((sum, sale) => sum + ((Number(sale.price) || 0) * (Number(sale.commissionRate) || 0)) / 100, 0);
+  const commission = sales.reduce(
+    (sum, sale) => sum + ((Number(sale.price) || 0) * (Number(sale.commissionRate) || 0)) / 100,
+    0
+  );
+
   const currentStreetKnocks = street.trim()
     ? knocks.filter((k) => k.street.toLowerCase() === street.trim().toLowerCase())
     : knocks;
 
+  function clearCurrentHouse() {
+    setHouse("");
+    setNote("");
+    setPhone("");
+    setCallbackTime("");
+    setSaleAmount("");
+  }
+
   function record(status: Status) {
     const cleanStreet = street.trim();
     const cleanHouse = house.trim();
+    const cleanSaleAmount = Number(saleAmount) || 0;
 
     if (!cleanStreet || !cleanHouse) {
       alert("Enter the street and house number first.");
+      return;
+    }
+
+    if (status === "Sold" && cleanSaleAmount <= 0) {
+      alert("Enter the sale amount before pressing Sold.");
       return;
     }
 
@@ -128,6 +163,7 @@ export default function App() {
       note: note.trim(),
       phone: phone.trim(),
       callbackTime: status === "Callback" ? callbackTime.trim() : "",
+      saleAmount: status === "Sold" ? cleanSaleAmount : 0,
       createdAt: new Date().toISOString(),
     };
 
@@ -140,7 +176,7 @@ export default function App() {
           knockId: entry.id,
           address: `${cleanHouse} ${cleanStreet}`,
           service: "Door sale",
-          price: 0,
+          price: cleanSaleAmount,
           deposit: 0,
           commissionRate: 30,
           createdAt: entry.createdAt,
@@ -149,10 +185,7 @@ export default function App() {
       ]);
     }
 
-    setHouse("");
-    setNote("");
-    setPhone("");
-    setCallbackTime("");
+    clearCurrentHouse();
   }
 
   function deleteKnock(id: string) {
@@ -186,10 +219,12 @@ export default function App() {
         <button className="icon-btn" type="button" aria-label="Menu">
           <Menu size={30} />
         </button>
+
         <div className="brand">
           <div className="brand-main">PLUTO</div>
           <div className="brand-sub">SALES COMMAND</div>
         </div>
+
         <button className="bell-btn" type="button" onClick={() => setTab("calls")} aria-label="Callbacks">
           <Bell size={28} />
           {callbacks.length > 0 && <span>{callbacks.length}</span>}
@@ -200,11 +235,13 @@ export default function App() {
         <section className="screen">
           <div className="hero-row">
             <div className="logo-tile">K</div>
+
             <div>
               <p className="muted big">Good evening,</p>
               <h1>Erdem</h1>
               <p className="muted">Enter street + house, then tap one action.</p>
             </div>
+
             <button className="session-card" type="button" onClick={() => setTab("history")}>
               <span className="status-dot" />
               <small>SESSION ACTIVE</small>
@@ -215,35 +252,58 @@ export default function App() {
 
           <section className="panel entry-panel">
             <div className="section-label">FAST KNOCK ENTRY</div>
+
             <label>
               Street name
               <input value={street} onChange={(e) => setStreet(e.target.value)} placeholder="Tillingham Gardens" />
             </label>
+
             <div className="two-col">
               <label>
                 House number
-                <input value={house} onChange={(e) => setHouse(e.target.value)} placeholder="1482" inputMode="numeric" autoComplete="off" />
+                <input
+                  value={house}
+                  onChange={(e) => setHouse(e.target.value)}
+                  placeholder="1482"
+                  inputMode="numeric"
+                  autoComplete="off"
+                />
               </label>
+
+              <label>
+                Sale amount
+                <input
+                  value={saleAmount}
+                  onChange={(e) => setSaleAmount(e.target.value)}
+                  placeholder="450"
+                  inputMode="decimal"
+                />
+              </label>
+            </div>
+
+            <div className="two-col">
               <label>
                 Phone optional
                 <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="905..." inputMode="tel" />
               </label>
-            </div>
-            <div className="two-col">
+
               <label>
                 Callback time optional
                 <input value={callbackTime} onChange={(e) => setCallbackTime(e.target.value)} placeholder="Tomorrow 6 PM" />
               </label>
-              <label>
-                Daily goal
-                <input value={dailyGoal} onChange={(e) => setDailyGoal(Number(e.target.value) || 0)} inputMode="numeric" />
-              </label>
             </div>
+
+            <label>
+              Daily goal
+              <input value={dailyGoal} onChange={(e) => setDailyGoal(Number(e.target.value) || 0)} inputMode="numeric" />
+            </label>
+
             <label>
               Notes optional
               <textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="Name, objection, price, callback details..." />
             </label>
-            <button className="ghost-btn" type="button" onClick={() => { setHouse(""); setNote(""); setPhone(""); setCallbackTime(""); }}>
+
+            <button className="ghost-btn" type="button" onClick={clearCurrentHouse}>
               <RotateCcw size={16} /> Clear current house
             </button>
           </section>
@@ -253,6 +313,7 @@ export default function App() {
             <div className="action-grid">
               {actions.map((status) => {
                 const config = actionConfig[status];
+
                 return (
                   <button key={status} className={`action-card ${config.className}`} type="button" onClick={() => record(status)}>
                     <span>{config.icon}</span>
@@ -282,10 +343,12 @@ export default function App() {
       {tab === "route" && (
         <section className="screen">
           <PageHeader icon={<MapPinned />} title="Route" subtitle="Manual list only. No generated houses." />
+
           <section className="panel entry-panel compact">
             <div className="section-label">CURRENT STREET FILTER</div>
             <input value={street} onChange={(e) => setStreet(e.target.value)} placeholder="Street name" />
           </section>
+
           <div className="list-stack">
             {currentStreetKnocks.length === 0 ? (
               <Empty text="No houses entered for this street yet. Go to Knock and save your first house." />
@@ -299,6 +362,7 @@ export default function App() {
       {tab === "calls" && (
         <section className="screen">
           <PageHeader icon={<PhoneCall />} title="Calls" subtitle="Callback pipeline, pulled from your quick actions." />
+
           <div className="list-stack">
             {callbacks.length === 0 ? (
               <Empty text="No callbacks yet. On the Knock screen, enter the house and tap Callback." />
@@ -311,21 +375,60 @@ export default function App() {
 
       {tab === "sales" && (
         <section className="screen">
-          <PageHeader icon={<BadgeDollarSign />} title="Sales" subtitle={`Revenue $${Math.round(revenue).toLocaleString()} · Commission $${Math.round(commission).toLocaleString()}`} />
+          <PageHeader
+            icon={<BadgeDollarSign />}
+            title="Sales"
+            subtitle={`Revenue $${Math.round(revenue).toLocaleString()} · Commission $${Math.round(commission).toLocaleString()}`}
+          />
+
           <div className="list-stack">
             {sales.length === 0 ? (
-              <Empty text="No sales yet. On the Knock screen, tap Sold and the sale appears here." />
+              <Empty text="No sales yet. On the Knock screen, enter sale amount and tap Sold." />
             ) : (
               sales.map((sale) => (
                 <article key={sale.id} className="panel sale-card">
                   <h3>{sale.address}</h3>
+
                   <div className="sale-grid">
-                    <label>Service<input value={sale.service} onChange={(e) => updateSale(sale.id, "service", e.target.value)} /></label>
-                    <label>Total price<input value={sale.price || ""} onChange={(e) => updateSale(sale.id, "price", e.target.value)} inputMode="decimal" placeholder="0" /></label>
-                    <label>Deposit<input value={sale.deposit || ""} onChange={(e) => updateSale(sale.id, "deposit", e.target.value)} inputMode="decimal" placeholder="0" /></label>
-                    <label>Commission %<input value={sale.commissionRate || ""} onChange={(e) => updateSale(sale.id, "commissionRate", e.target.value)} inputMode="decimal" placeholder="30" /></label>
+                    <label>
+                      Service
+                      <input value={sale.service} onChange={(e) => updateSale(sale.id, "service", e.target.value)} />
+                    </label>
+
+                    <label>
+                      Total price
+                      <input
+                        value={sale.price || ""}
+                        onChange={(e) => updateSale(sale.id, "price", e.target.value)}
+                        inputMode="decimal"
+                        placeholder="0"
+                      />
+                    </label>
+
+                    <label>
+                      Deposit
+                      <input
+                        value={sale.deposit || ""}
+                        onChange={(e) => updateSale(sale.id, "deposit", e.target.value)}
+                        inputMode="decimal"
+                        placeholder="0"
+                      />
+                    </label>
+
+                    <label>
+                      Commission %
+                      <input
+                        value={sale.commissionRate || ""}
+                        onChange={(e) => updateSale(sale.id, "commissionRate", e.target.value)}
+                        inputMode="decimal"
+                        placeholder="30"
+                      />
+                    </label>
                   </div>
-                  <div className="sale-total">Commission: ${Math.round(((sale.price || 0) * (sale.commissionRate || 0)) / 100).toLocaleString()}</div>
+
+                  <div className="sale-total">
+                    Commission: ${Math.round(((sale.price || 0) * (sale.commissionRate || 0)) / 100).toLocaleString()}
+                  </div>
                 </article>
               ))
             )}
@@ -335,13 +438,18 @@ export default function App() {
 
       {tab === "history" && (
         <section className="screen">
-          <PageHeader icon={<History />} title="History" subtitle="All knocks, including callbacks, saved in order." />
+          <PageHeader icon={<History />} title="History" subtitle="All knocks, including callbacks and sales, saved in order." />
+
           <section className="panel mini-dashboard">
             <Mini label="All Doors" value={knocks.length} />
             <Mini label="Callbacks" value={callbacks.length} orange />
             <Mini label="Close %" value={`${closeRate}%`} green />
           </section>
-          <button className="danger-btn" type="button" onClick={resetToday}>Clear today only</button>
+
+          <button className="danger-btn" type="button" onClick={resetToday}>
+            Clear today only
+          </button>
+
           <div className="list-stack">
             {knocks.length === 0 ? (
               <Empty text="Your full door history will show here." />
@@ -355,7 +463,9 @@ export default function App() {
       <nav className="bottom-nav">
         <TabButton tab={tab} setTab={setTab} id="knock" label="Knock" icon={<Home />} />
         <TabButton tab={tab} setTab={setTab} id="route" label="Route" icon={<MapPinned />} />
-        <button className="center-action" type="button" onClick={() => setTab("knock")} aria-label="Knock entry"><DoorOpen size={30} /></button>
+        <button className="center-action" type="button" onClick={() => setTab("knock")} aria-label="Knock entry">
+          <DoorOpen size={30} />
+        </button>
         <TabButton tab={tab} setTab={setTab} id="calls" label="Calls" icon={<PhoneCall />} />
         <TabButton tab={tab} setTab={setTab} id="history" label="History" icon={<ClipboardList />} />
       </nav>
@@ -363,25 +473,50 @@ export default function App() {
   );
 }
 
-function ProgressPanel({ today, dailyGoal, todayCloseRate, goalPercent, totalSales, callbacks, interested, commission }: { today: number; dailyGoal: number; todayCloseRate: number; goalPercent: number; totalSales: number; callbacks: number; interested: number; commission: number }) {
+function ProgressPanel({
+  today,
+  dailyGoal,
+  todayCloseRate,
+  goalPercent,
+  totalSales,
+  callbacks,
+  interested,
+  commission,
+}: {
+  today: number;
+  dailyGoal: number;
+  todayCloseRate: number;
+  goalPercent: number;
+  totalSales: number;
+  callbacks: number;
+  interested: number;
+  commission: number;
+}) {
   return (
     <section className="panel progress-panel">
-      <div className="section-label purple">TODAY'S PROGRESS</div>
+      <div className="section-label purple">TODAY&apos;S PROGRESS</div>
+
       <div className="progress-top">
         <div>
           <p>DOORS KNOCKED</p>
           <strong>{today}</strong>
           <small>Goal: {dailyGoal}</small>
         </div>
+
         <div>
           <p>CLOSE RATE</p>
           <strong className="green-text">{todayCloseRate}%</strong>
-          <small>today's rate</small>
+          <small>today&apos;s rate</small>
         </div>
+
         <div className="ring" style={{ background: `conic-gradient(#7367ff ${goalPercent * 3.6}deg, rgba(255,255,255,.09) 0deg)` }}>
-          <div><strong>{goalPercent}%</strong><span>of goal</span></div>
+          <div>
+            <strong>{goalPercent}%</strong>
+            <span>of goal</span>
+          </div>
         </div>
       </div>
+
       <div className="mini-row">
         <Mini label="Sales" value={totalSales} green />
         <Mini label="Commission" value={`$${Math.round(commission)}`} purple />
@@ -395,19 +530,37 @@ function ProgressPanel({ today, dailyGoal, todayCloseRate, goalPercent, totalSal
 function RoutePreview({ street, knocks, setTab }: { street: string; knocks: Knock[]; setTab: (tab: Tab) => void }) {
   return (
     <button className="panel route-preview" type="button" onClick={() => setTab("route")}>
-      <div className="map-card"><MapPinned size={34} /></div>
+      <div className="map-card">
+        <MapPinned size={34} />
+      </div>
+
       <div>
         <div className="section-label purple">CURRENT ROUTE</div>
         <h2>{street.trim() || "Enter Street"}</h2>
         <p>{knocks.length} manually entered houses</p>
-        <div className="bar"><span style={{ width: `${Math.min(100, knocks.length * 8)}%` }} /></div>
+        <div className="bar">
+          <span style={{ width: `${Math.min(100, knocks.length * 8)}%` }} />
+        </div>
       </div>
+
       <span className="chev">›</span>
     </button>
   );
 }
 
-function TabButton({ tab, setTab, id, label, icon }: { tab: Tab; setTab: (tab: Tab) => void; id: Tab; label: string; icon: React.ReactNode }) {
+function TabButton({
+  tab,
+  setTab,
+  id,
+  label,
+  icon,
+}: {
+  tab: Tab;
+  setTab: (tab: Tab) => void;
+  id: Tab;
+  label: string;
+  icon: React.ReactNode;
+}) {
   return (
     <button type="button" className={tab === id ? "nav-tab active" : "nav-tab"} onClick={() => setTab(id)}>
       {icon}
@@ -432,11 +585,23 @@ function KnockCard({ knock, onDelete }: { knock: Knock; onDelete: () => void }) 
   return (
     <article className="panel knock-card">
       <div className="card-row">
-        <div><h3>{knock.house}</h3><p>{knock.street}</p></div>
+        <div>
+          <h3>{knock.house}</h3>
+          <p>{knock.street}</p>
+        </div>
+
         <span className={`pill ${slug(knock.status)}`}>{knock.status}</span>
       </div>
+
+      {knock.saleAmount ? <div className="note-box">Sale Amount: ${knock.saleAmount.toLocaleString()}</div> : null}
       {knock.note && <div className="note-box">{knock.note}</div>}
-      <div className="card-footer"><small>{new Date(knock.createdAt).toLocaleString()}</small><button onClick={onDelete}><Trash2 size={15} /> Delete</button></div>
+
+      <div className="card-footer">
+        <small>{new Date(knock.createdAt).toLocaleString()}</small>
+        <button onClick={onDelete}>
+          <Trash2 size={15} /> Delete
+        </button>
+      </div>
     </article>
   );
 }
@@ -444,31 +609,87 @@ function KnockCard({ knock, onDelete }: { knock: Knock; onDelete: () => void }) 
 function CallbackCard({ knock, onDelete }: { knock: Knock; onDelete: () => void }) {
   return (
     <article className="panel callback-card">
-      <div className="time-box"><strong>{knock.callbackTime || "Call"}</strong></div>
-      <div className="grow"><h3>{knock.house} {knock.street}</h3><p>{knock.note || "Callback lead"}</p>{knock.phone && <a href={`tel:${knock.phone}`}>{knock.phone}</a>}</div>
-      <button className="call-now" type="button" onClick={() => knock.phone ? (window.location.href = `tel:${knock.phone}`) : undefined}><PhoneCall size={22} /></button>
-      <button className="tiny-delete" onClick={onDelete}><Trash2 size={15} /></button>
+      <div className="time-box">
+        <strong>{knock.callbackTime || "Call"}</strong>
+      </div>
+
+      <div className="grow">
+        <h3>
+          {knock.house} {knock.street}
+        </h3>
+        <p>{knock.note || "Callback lead"}</p>
+        {knock.phone && <a href={`tel:${knock.phone}`}>{knock.phone}</a>}
+      </div>
+
+      <button className="call-now" type="button" onClick={() => (knock.phone ? (window.location.href = `tel:${knock.phone}`) : undefined)}>
+        <PhoneCall size={22} />
+      </button>
+
+      <button className="tiny-delete" onClick={onDelete}>
+        <Trash2 size={15} />
+      </button>
     </article>
   );
 }
 
 function HistoryCard({ knock, onDelete }: { knock: Knock; onDelete: () => void }) {
   const isCallback = knock.status === "Callback";
+  const isSold = knock.status === "Sold";
+
   return (
     <article className={isCallback ? "panel history-card callback-highlight" : "panel history-card"}>
       <div className="card-row">
-        <div><h3>{knock.house} {knock.street}</h3><p>{new Date(knock.createdAt).toLocaleString()}</p></div>
+        <div>
+          <h3>
+            {knock.house} {knock.street}
+          </h3>
+          <p>{new Date(knock.createdAt).toLocaleString()}</p>
+        </div>
+
         <span className={`pill ${slug(knock.status)}`}>{knock.status}</span>
       </div>
-      {isCallback && <div className="callback-strip"><PhoneCall size={16} /> Callback: {knock.callbackTime || "time not set"}</div>}
+
+      {isSold && <div className="callback-strip">Sale Amount: ${Number(knock.saleAmount || 0).toLocaleString()}</div>}
+
+      {isCallback && (
+        <div className="callback-strip">
+          <PhoneCall size={16} /> Callback: {knock.callbackTime || "time not set"}
+        </div>
+      )}
+
       {knock.note && <div className="note-box">{knock.note}</div>}
-      <div className="card-footer"><span>{knock.phone || "No phone"}</span><button onClick={onDelete}><Trash2 size={15} /> Delete</button></div>
+
+      <div className="card-footer">
+        <span>{knock.phone || "No phone"}</span>
+        <button onClick={onDelete}>
+          <Trash2 size={15} /> Delete
+        </button>
+      </div>
     </article>
   );
 }
 
-function Mini({ label, value, green, purple, orange, blue }: { label: string; value: string | number; green?: boolean; purple?: boolean; orange?: boolean; blue?: boolean }) {
-  return <div className="mini"><strong className={green ? "green-text" : purple ? "purple-text" : orange ? "orange-text" : blue ? "blue-text" : ""}>{value}</strong><span>{label}</span></div>;
+function Mini({
+  label,
+  value,
+  green,
+  purple,
+  orange,
+  blue,
+}: {
+  label: string;
+  value: string | number;
+  green?: boolean;
+  purple?: boolean;
+  orange?: boolean;
+  blue?: boolean;
+}) {
+  return (
+    <div className="mini">
+      <strong className={green ? "green-text" : purple ? "purple-text" : orange ? "orange-text" : blue ? "blue-text" : ""}>{value}</strong>
+      <span>{label}</span>
+    </div>
+  );
 }
 
 function Empty({ text }: { text: string }) {
