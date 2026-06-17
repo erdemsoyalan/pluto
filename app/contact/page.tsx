@@ -3,7 +3,7 @@ import Image from "next/image"
 import { Navigation } from "@/components/navigation"
 import { Footer } from "@/components/footer"
 import { ContactForm } from "@/components/contact-form"
-import { Mail, MapPin, Clock } from "lucide-react"
+import { Mail, MapPin, Clock, Phone } from "lucide-react"
 
 export const metadata: Metadata = {
   title: "Contact Us | Pluto Property Management Inc.",
@@ -11,6 +11,12 @@ export const metadata: Metadata = {
 }
 
 const contactInfo = [
+  {
+    icon: Phone,
+    label: "Phone",
+    value: "905-299-6738",
+    href: "tel:905-299-6738",
+  },
   {
     icon: Mail,
     label: "Email",
