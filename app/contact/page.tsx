@@ -32,7 +32,7 @@ const contactInfo = [
   {
     icon: Clock,
     label: "Response Time",
-    value: "Within 1-2 business days",
+    value: "Within 2-4 hours",
     href: null,
   },
 ]
