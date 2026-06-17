@@ -200,8 +200,15 @@ export function Navigation() {
 
         {/* Mobile Navigation */}
         {isMobileMenuOpen && (
-          <div className="md:hidden py-4 border-t border-border">
-            <div className="flex flex-col gap-2">
+          <>
+            {/* Backdrop */}
+            <div
+              className="md:hidden fixed inset-0 top-14 z-40 bg-black/40"
+              onClick={() => setIsMobileMenuOpen(false)}
+              aria-hidden="true"
+            />
+            <div className="md:hidden fixed left-0 right-0 top-14 z-40 max-h-[calc(100vh-3.5rem)] overflow-y-auto bg-background border-t border-border shadow-xl px-4 py-4">
+              <div className="flex flex-col gap-2">
               <Link
                 href="/"
                 className={cn(
@@ -323,8 +330,9 @@ export function Navigation() {
                   Get a Quote
                 </Link>
               </Button>
+              </div>
             </div>
-          </div>
+          </>
         )}
       </nav>
     </header>
