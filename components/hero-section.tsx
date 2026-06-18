@@ -12,7 +12,7 @@ const trustBadges = [
 
 export function HeroSection() {
   return (
-    <section className="relative min-h-screen flex items-start lg:items-center pt-36 lg:pt-32 pb-16 lg:pb-0 overflow-hidden">
+    <section className="relative lg:min-h-[85vh] flex items-start lg:items-center pt-36 lg:pt-32 pb-16 lg:pb-20 overflow-hidden">
       {/* Background - white near the header fading down into the peach header tone */}
       <div
         className="absolute inset-0"
