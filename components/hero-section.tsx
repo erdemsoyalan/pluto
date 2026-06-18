@@ -12,22 +12,48 @@ const trustBadges = [
 
 export function HeroSection() {
   return (
-    <section className="relative min-h-screen flex items-start lg:items-center pt-36 lg:pt-32 pb-16 lg:pb-0">
-      {/* Background - white near the header fading down into the peach header tone */}
+    <section className="relative min-h-screen flex items-start lg:items-center pt-36 lg:pt-32 pb-16 lg:pb-0 overflow-hidden">
+      {/* Photo wash - real work photos faded softly into the background */}
+      <div className="absolute inset-0 grid grid-cols-1 sm:grid-cols-2">
+        <div className="relative h-full">
+          <Image
+            src="/hero-window-cleaning.jpg"
+            alt=""
+            fill
+            sizes="50vw"
+            className="object-cover object-center opacity-20"
+            priority
+          />
+        </div>
+        <div className="relative hidden h-full sm:block">
+          <Image
+            src="/hero-kitchen.jpg"
+            alt=""
+            fill
+            sizes="50vw"
+            className="object-cover object-center opacity-20"
+            priority
+          />
+        </div>
+      </div>
+
+      {/* Gradient overlay - keeps text crisp and blends photos into the peach tone */}
       <div
         className="absolute inset-0"
         style={{
-          background: "linear-gradient(to bottom, #FFFFFF 0%, #FFFFFF 18%, #FDF7F0 55%)",
+          background:
+            "linear-gradient(to bottom, rgba(255,255,255,0.96) 0%, rgba(255,255,255,0.88) 18%, rgba(253,247,240,0.86) 55%, rgba(253,247,240,0.94) 100%)",
         }}
       />
-      
-      {/* Subtle pattern overlay */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)`,
-          backgroundSize: '40px 40px'
-        }} />
-      </div>
+
+      {/* Soft side vignette to feather the photo edges */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(120% 90% at 50% 40%, transparent 40%, rgba(253,247,240,0.55) 100%)",
+        }}
+      />
 
       <div className="container mx-auto px-4 lg:px-8 relative z-10">
         <div className="max-w-4xl mx-auto text-center">
