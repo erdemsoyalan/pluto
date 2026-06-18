@@ -13,35 +13,40 @@ const trustBadges = [
 export function HeroSection() {
   return (
     <section className="relative min-h-screen flex items-start lg:items-center pt-36 lg:pt-32 pb-16 lg:pb-0 overflow-hidden">
-      {/* Photo background - real work photos shown clearly */}
-      <div className="absolute inset-0 grid grid-cols-1 sm:grid-cols-2">
-        <div className="relative h-full">
+      {/* Background - white near the header fading down into the peach header tone */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background: "linear-gradient(to bottom, #FFFFFF 0%, #FFFFFF 18%, #FDF7F0 55%)",
+        }}
+      />
+
+      {/* Floating work photos off to the sides - clearly visible but semi-transparent */}
+      <div className="absolute inset-0 hidden lg:block pointer-events-none" aria-hidden="true">
+        <div className="absolute left-8 top-1/2 -translate-y-1/2 w-56 xl:w-64 aspect-[3/4] rounded-2xl overflow-hidden shadow-xl border border-white/70 opacity-60 -rotate-3">
           <Image
             src="/hero-window-cleaning.jpg"
             alt="Pluto team member cleaning a window"
             fill
-            sizes="(max-width: 640px) 100vw, 50vw"
+            sizes="256px"
             className="object-cover object-center"
             priority
           />
         </div>
-        <div className="relative hidden h-full sm:block">
+        <div className="absolute right-8 top-1/2 -translate-y-1/2 w-56 xl:w-64 aspect-[4/3] rounded-2xl overflow-hidden shadow-xl border border-white/70 opacity-60 rotate-3">
           <Image
             src="/hero-kitchen.jpg"
             alt="Freshly cleaned modern kitchen"
             fill
-            sizes="50vw"
+            sizes="256px"
             className="object-cover object-center"
             priority
           />
         </div>
       </div>
 
-      {/* Subtle dark scrim so the white content card pops on any photo */}
-      <div className="absolute inset-0 bg-black/30" />
-
       <div className="container mx-auto px-4 lg:px-8 relative z-10">
-        <div className="max-w-3xl mx-auto text-center bg-white/85 backdrop-blur-md rounded-3xl border border-white/60 shadow-2xl px-6 py-10 sm:px-10 sm:py-12">
+        <div className="max-w-3xl mx-auto text-center">
           {/* Full Logo */}
           <div className="mb-4 animate-logo-entrance">
             <Image
@@ -106,8 +111,8 @@ export function HeroSection() {
         </div>
       </div>
 
-      {/* Bottom gradient fade into the next section */}
-      <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-background via-background/70 to-transparent" />
+      {/* Bottom gradient fade */}
+      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-secondary/30 to-transparent" />
     </section>
   )
 }
