@@ -21,32 +21,34 @@ export function HeroSection() {
         }}
       />
 
-      {/* Floating work photos off to the sides - clearly visible but semi-transparent */}
+      {/* Work photos anchored to the page edges - larger, clearer, semi-transparent */}
       <div className="absolute inset-0 hidden lg:block pointer-events-none" aria-hidden="true">
-        <div className="absolute left-8 top-1/2 -translate-y-1/2 w-56 xl:w-64 aspect-[3/4] rounded-2xl overflow-hidden shadow-xl border border-white/70 opacity-60 -rotate-3">
+        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-72 xl:w-80 aspect-[3/4] rounded-r-3xl overflow-hidden shadow-2xl border border-white/70 opacity-75">
           <Image
             src="/hero-window-cleaning.jpg"
             alt="Pluto team member cleaning a window"
             fill
-            sizes="256px"
+            sizes="(max-width: 1280px) 288px, 320px"
             className="object-cover object-center"
+            quality={95}
             priority
           />
         </div>
-        <div className="absolute right-8 top-1/2 -translate-y-1/2 w-56 xl:w-64 aspect-[4/3] rounded-2xl overflow-hidden shadow-xl border border-white/70 opacity-60 rotate-3">
+        <div className="absolute right-0 top-1/2 -translate-y-1/2 w-72 xl:w-80 aspect-[3/4] rounded-l-3xl overflow-hidden shadow-2xl border border-white/70 opacity-75">
           <Image
             src="/hero-kitchen.jpg"
             alt="Freshly cleaned modern kitchen"
             fill
-            sizes="256px"
+            sizes="(max-width: 1280px) 288px, 320px"
             className="object-cover object-center"
+            quality={95}
             priority
           />
         </div>
       </div>
 
       <div className="container mx-auto px-4 lg:px-8 relative z-10">
-        <div className="max-w-3xl mx-auto text-center">
+        <div className="max-w-2xl mx-auto text-center bg-white/80 backdrop-blur-sm rounded-3xl shadow-lg ring-1 ring-black/5 px-6 py-8 sm:px-8">
           {/* Full Logo */}
           <div className="mb-4 animate-logo-entrance">
             <Image
