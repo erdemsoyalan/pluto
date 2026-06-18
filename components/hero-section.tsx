@@ -13,50 +13,35 @@ const trustBadges = [
 export function HeroSection() {
   return (
     <section className="relative min-h-screen flex items-start lg:items-center pt-36 lg:pt-32 pb-16 lg:pb-0 overflow-hidden">
-      {/* Photo wash - real work photos faded softly into the background */}
+      {/* Photo background - real work photos shown clearly */}
       <div className="absolute inset-0 grid grid-cols-1 sm:grid-cols-2">
         <div className="relative h-full">
           <Image
             src="/hero-window-cleaning.jpg"
-            alt=""
+            alt="Pluto team member cleaning a window"
             fill
-            sizes="50vw"
-            className="object-cover object-center opacity-20"
+            sizes="(max-width: 640px) 100vw, 50vw"
+            className="object-cover object-center"
             priority
           />
         </div>
         <div className="relative hidden h-full sm:block">
           <Image
             src="/hero-kitchen.jpg"
-            alt=""
+            alt="Freshly cleaned modern kitchen"
             fill
             sizes="50vw"
-            className="object-cover object-center opacity-20"
+            className="object-cover object-center"
             priority
           />
         </div>
       </div>
 
-      {/* Gradient overlay - keeps text crisp and blends photos into the peach tone */}
-      <div
-        className="absolute inset-0"
-        style={{
-          background:
-            "linear-gradient(to bottom, rgba(255,255,255,0.96) 0%, rgba(255,255,255,0.88) 18%, rgba(253,247,240,0.86) 55%, rgba(253,247,240,0.94) 100%)",
-        }}
-      />
-
-      {/* Soft side vignette to feather the photo edges */}
-      <div
-        className="absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(120% 90% at 50% 40%, transparent 40%, rgba(253,247,240,0.55) 100%)",
-        }}
-      />
+      {/* Subtle dark scrim so the white content card pops on any photo */}
+      <div className="absolute inset-0 bg-black/30" />
 
       <div className="container mx-auto px-4 lg:px-8 relative z-10">
-        <div className="max-w-4xl mx-auto text-center">
+        <div className="max-w-3xl mx-auto text-center bg-white/85 backdrop-blur-md rounded-3xl border border-white/60 shadow-2xl px-6 py-10 sm:px-10 sm:py-12">
           {/* Full Logo */}
           <div className="mb-4 animate-logo-entrance">
             <Image
@@ -121,8 +106,8 @@ export function HeroSection() {
         </div>
       </div>
 
-      {/* Bottom gradient fade */}
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-secondary/30 to-transparent" />
+      {/* Bottom gradient fade into the next section */}
+      <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-background via-background/70 to-transparent" />
     </section>
   )
 }
