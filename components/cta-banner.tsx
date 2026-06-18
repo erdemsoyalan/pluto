@@ -21,7 +21,7 @@ export function CTABanner() {
               className="mx-auto"
             />
           </div>
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-6 text-balance">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-6 text-balance leading-snug lg:leading-tight">
             Need your property maintained without the headache?
           </h2>
           <p className="text-muted-foreground text-lg mb-10 max-w-2xl mx-auto text-pretty">
